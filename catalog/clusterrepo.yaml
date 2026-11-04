@@ -1,9 +1,9 @@
 # Register once per Rancher management cluster (Apps and SUSE AI Factory both
-# read it). Blueprints reference it as chartRepo: wiredquill-can-i.
+# read it). Blueprints reference it as chartRepo: suse-tm-can-i.
 apiVersion: catalog.cattle.io/v1
 kind: ClusterRepo
 metadata:
-  name: wiredquill-can-i
+  name: suse-tm-can-i
 spec:
-  gitRepo: https://github.com/wiredquill/can-i
+  gitRepo: https://github.com/SUSE-Technical-Marketing/can-i
   gitBranch: aif/charts

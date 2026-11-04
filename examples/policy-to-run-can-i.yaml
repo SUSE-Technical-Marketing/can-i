@@ -2,7 +2,7 @@
 # as a sandbox workload — and to make the demo meaningful.
 #
 #   openshell sandbox create --name can-i \
-#     --from ghcr.io/wiredquill/can-i:latest \
+#     --from ghcr.io/suse-technical-marketing/can-i:latest \
 #     --policy examples/policy-to-run-can-i.yaml \
 #     -- can-i tui
 #

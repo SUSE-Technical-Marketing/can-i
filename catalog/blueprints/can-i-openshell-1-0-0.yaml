@@ -32,11 +32,11 @@ spec:
     # Install everything into one namespace: can-i reads the gateway's
     # openshell-client-tls Secret and calls https://openshell:8080.
     - chartName: agent-sandbox
-      chartRepo: wiredquill-can-i
+      chartRepo: suse-tm-can-i
       chartVersion: "1.0.8"
       releaseName: agent-sandbox
     - chartName: openshell-gateway
-      chartRepo: wiredquill-can-i
+      chartRepo: suse-tm-can-i
       chartVersion: "0.1.6"
       releaseName: openshell
       values:
@@ -48,7 +48,7 @@ spec:
               # check instead of failing the bundle.
               enabled: false
     - chartName: can-i
-      chartRepo: wiredquill-can-i
+      chartRepo: suse-tm-can-i
       chartVersion: "0.1.1"
       releaseName: can-i
       values:

@@ -17,7 +17,7 @@ RUN python3.13 -m venv --without-pip /opt/can-i \
 FROM registry.opensuse.org/opensuse/leap:16.0
 LABEL org.opencontainers.image.title="can-i (openSUSE Leap 16.0)" \
       org.opencontainers.image.description="Security capability inspector and sandbox demo dashboard (TUI + Web)" \
-      org.opencontainers.image.source="https://github.com/wiredquill/can-i"
+      org.opencontainers.image.source="https://github.com/SUSE-Technical-Marketing/can-i"
 
 # curl/getent/unshare/ping back the default probes
 RUN zypper -n install --no-recommends python313 curl util-linux shadow iputils && zypper -n clean -a

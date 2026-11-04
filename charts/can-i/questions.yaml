@@ -12,9 +12,9 @@ questions:
     - custom
   description: >-
     The OpenShell child container can-i runs in.
-    suse = SUSE BCI (ghcr.io/wiredquill/can-i),
-    opensuse = openSUSE Leap 16.0 (ghcr.io/wiredquill/can-i-opensuse),
-    nvidia = NVIDIA base Ubuntu 24.04, the OpenShell chart's default sandbox base (ghcr.io/wiredquill/can-i-nvidia),
+    suse = SUSE BCI (ghcr.io/suse-technical-marketing/can-i),
+    opensuse = openSUSE Leap 16.0 (ghcr.io/suse-technical-marketing/can-i-opensuse),
+    nvidia = NVIDIA base Ubuntu 24.04, the OpenShell chart's default sandbox base (ghcr.io/suse-technical-marketing/can-i-nvidia),
     custom = your own image below.
     Changing it recreates the sandbox.
 - variable: sandbox.customImage
@@ -135,7 +135,7 @@ questions:
   label: Client image
   group: Advanced
   type: string
-  default: ghcr.io/wiredquill/can-i-client
+  default: ghcr.io/suse-technical-marketing/can-i-client
 - variable: client.image.tag
   label: Client image tag
   group: Advanced

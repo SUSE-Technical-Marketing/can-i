@@ -9,9 +9,9 @@ sandbox:
   # Which can-i image the sandbox runs: suse | opensuse | nvidia | custom
   image: suse
   images:
-    suse: ghcr.io/wiredquill/can-i:latest              # SUSE BCI Python 3.13
-    opensuse: ghcr.io/wiredquill/can-i-opensuse:latest # openSUSE Leap 16.0
-    nvidia: ghcr.io/wiredquill/can-i-nvidia:latest     # NVIDIA base Ubuntu 24.04
+    suse: ghcr.io/suse-technical-marketing/can-i:latest              # SUSE BCI Python 3.13
+    opensuse: ghcr.io/suse-technical-marketing/can-i-opensuse:latest # openSUSE Leap 16.0
+    nvidia: ghcr.io/suse-technical-marketing/can-i-nvidia:latest     # NVIDIA base Ubuntu 24.04
   # Used when image is "custom". Must contain can-i and a uid-10001 user.
   customImage: ""
   # Request a GPU for the sandbox (needs a GPU node and RuntimeClass).
@@ -43,7 +43,7 @@ gateway:
 
 client:
   image:
-    repository: ghcr.io/wiredquill/can-i-client
+    repository: ghcr.io/suse-technical-marketing/can-i-client
     tag: latest
     pullPolicy: Always
   resources:

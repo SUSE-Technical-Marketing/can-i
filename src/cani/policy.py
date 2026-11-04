@@ -372,7 +372,7 @@ f"{rest} --wait"
             "# merge the YAML fragment into your policy file (policy.yaml), then recreate:\n"
             f"openshell sandbox delete {sb}\n"
             f"openshell sandbox create --name {sb} \\\n"
-            "  --from ghcr.io/wiredquill/can-i:latest \\\n"
+            "  --from ghcr.io/suse-technical-marketing/can-i:latest \\\n"
             "  --policy policy.yaml \\\n"
             "  --detach -- can-i web --host 0.0.0.0 --port 8000"
         ),

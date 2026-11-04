@@ -34,9 +34,9 @@ def env(docs) -> dict[str, str]:
 
 
 @pytest.mark.parametrize("choice,image", [
-    ("suse", "ghcr.io/wiredquill/can-i:latest"),
-    ("opensuse", "ghcr.io/wiredquill/can-i-opensuse:latest"),
-    ("nvidia", "ghcr.io/wiredquill/can-i-nvidia:latest"),
+    ("suse", "ghcr.io/suse-technical-marketing/can-i:latest"),
+    ("opensuse", "ghcr.io/suse-technical-marketing/can-i-opensuse:latest"),
+    ("nvidia", "ghcr.io/suse-technical-marketing/can-i-nvidia:latest"),
 ])
 def test_image_dropdown_picks_sandbox_image(tmp_path, choice, image):
     assert env(render(tmp_path, sandbox={"image": choice}))["SANDBOX_IMAGE"] == image
