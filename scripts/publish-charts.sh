@@ -6,7 +6,7 @@
 #   scripts/publish-charts.sh          # package + commit on aif/charts
 #   scripts/publish-charts.sh --push   # ... and push it
 #
-# Then register the repo once per Rancher management cluster:
+# Then register the repo on each cluster that installs the charts:
 #   kubectl apply -f catalog/clusterrepo.yaml
 set -euo pipefail
 
