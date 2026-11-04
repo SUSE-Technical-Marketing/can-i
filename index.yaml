@@ -1,0 +1,95 @@
+apiVersion: v1
+entries:
+  agent-sandbox:
+  - annotations:
+      catalog.cattle.io/display-name: OpenShell 1 - Agent Sandbox controller
+      catalog.cattle.io/namespace: agent-sandbox-system
+      catalog.cattle.io/release-name: agent-sandbox
+    apiVersion: v2
+    appVersion: v1.0.8
+    created: "2026-11-04T06:37:08.971466-08:00"
+    description: Kubernetes Agent Sandbox CRD and controller (agents.x-k8s.io), the
+      cluster prerequisite for OpenShell's Kubernetes driver. Install first, once
+      per cluster. Packages the upstream v1.0.8 sandbox.yaml release manifest.
+    digest: f576d9a1c70cde4eb2b3befe31a6f5e8d24d1a383d65ba0c7ffbf1903a935af7
+    home: https://github.com/SUSE-Technical-Marketing/can-i
+    keywords:
+    - openshell
+    - agent-sandbox
+    - sandbox
+    - ai-agents
+    - suse-ai-factory
+    maintainers:
+    - name: SUSE Technical Marketing
+      url: https://github.com/SUSE-Technical-Marketing
+    name: agent-sandbox
+    sources:
+    - https://github.com/kubernetes-sigs/agent-sandbox
+    type: application
+    urls:
+    - agent-sandbox-1.0.11.tgz
+    version: 1.0.11
+  can-i:
+  - annotations:
+      catalog.cattle.io/display-name: OpenShell 3 - can-i sandbox
+      catalog.cattle.io/release-name: can-i
+    apiVersion: v2
+    appVersion: 0.1.0
+    created: "2026-11-04T06:37:08.971753-08:00"
+    description: can-i security capability inspector, run as an OpenShell sandbox
+      workload. Pick the sandbox image (SUSE BCI, openSUSE Leap 16 or NVIDIA Ubuntu)
+      and watch what the OpenShell policy lets an agent do.
+    digest: 688d21b91a8f804de2cceb1418ab73813907e106ad67d26cc2c399557ea1e598
+    home: https://github.com/SUSE-Technical-Marketing/can-i
+    keywords:
+    - openshell
+    - sandbox
+    - security
+    - ai-agents
+    - demo
+    - suse-ai-factory
+    maintainers:
+    - name: SUSE Technical Marketing
+      url: https://github.com/SUSE-Technical-Marketing
+    name: can-i
+    sources:
+    - https://github.com/SUSE-Technical-Marketing/can-i
+    type: application
+    urls:
+    - can-i-0.1.5.tgz
+    version: 0.1.5
+  openshell-gateway:
+  - annotations:
+      catalog.cattle.io/display-name: OpenShell 2 - Gateway
+      catalog.cattle.io/release-name: openshell
+    apiVersion: v2
+    appVersion: 0.1.5
+    created: "2026-11-04T06:37:08.97339-08:00"
+    dependencies:
+    - alias: openshell
+      name: helm-chart
+      repository: ""
+      version: 0.1.5
+    description: NVIDIA OpenShell gateway (control plane for agent sandboxes; creates
+      no sandbox itself) with lab defaults and a Rancher install form. Vendors the
+      official NVIDIA chart oci://ghcr.io/nvidia/openshell/helm-chart 0.1.5 in charts/helm-chart,
+      with nvidia-chart.patch applied.
+    digest: 6883e26a60c01653997154a3cb41cf280039ed1ec51b17303e27eec57d89b00d
+    home: https://github.com/SUSE-Technical-Marketing/can-i
+    keywords:
+    - openshell
+    - nvidia
+    - sandbox
+    - ai-agents
+    - suse-ai-factory
+    maintainers:
+    - name: SUSE Technical Marketing
+      url: https://github.com/SUSE-Technical-Marketing
+    name: openshell-gateway
+    sources:
+    - https://github.com/NVIDIA/OpenShell
+    type: application
+    urls:
+    - openshell-gateway-0.1.9.tgz
+    version: 0.1.9
+generated: "2026-11-04T06:37:08.970655-08:00"
