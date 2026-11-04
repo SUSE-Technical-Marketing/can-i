@@ -272,7 +272,7 @@ runs no sandbox; the can-i app creates it. The architecture diagram is in
 
 **Or deploy the AI Factory blueprint**, which installs all three into one namespace:
 ```bash
-kubectl apply -f catalog/blueprints/can-i-openshell-1-0-0.yaml
+kubectl apply -f catalog/blueprints/can-i-openshell-1-0-1.yaml
 ```
 Then go to **AI Factory → Blueprints → can-i in an OpenShell sandbox → Deploy**.
 [`catalog/blueprints/blueprint-catalog.yaml`](catalog/blueprints/blueprint-catalog.yaml)
