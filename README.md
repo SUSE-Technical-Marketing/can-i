@@ -8,17 +8,61 @@
 - **Web UI** — dark-mode dashboard (FastAPI + SSE) with a live `checks.yaml` editor; no restarts needed to change probes.
 - **Everywhere** — runs from a SUSE BCI container image, or installs directly on a host/sandbox via [`mise`](https://mise.jdx.dev) like an agent payload.
 
+```
+ Host hermes   Kernel 6.12.0-160000.39-default   User erin (uid 1000)
+ Container podman   AppArmor unconfined   seccomp filter   Sandboxed YES
+┌─────────┬────────────────────────────┬────────────┬──────┬─────────┐
+│ Status  │ Check                      │ Category   │ Exit │ Latency │
+├─────────┼────────────────────────────┼────────────┼──────┼─────────┤
+│ ALLOWED │ Outbound HTTPS (suse.com)  │ network    │ 0    │ 312 ms  │
+│ DENIED  │ Read /etc/shadow           │ filesystem │ 1    │ 4 ms    │
+│ DENIED  │ Write to /var/tmp          │ filesystem │ 1    │ 3 ms    │
+└─────────┴────────────────────────────┴────────────┴──────┴─────────┘
+```
+
 ## Install on Kubernetes
 
-The charts are published on this repo's `aif/charts` branch. See
-[Kubernetes with Rancher or SUSE AI Factory](#4-kubernetes-with-rancher-or-suse-ai-factory)
-for what each chart does and the cluster requirements (a CNI that enforces `NetworkPolicy`,
-and [Landlock](docs/landlock/README.md) on sandbox nodes).
+Three charts make up the lab: the Agent Sandbox controller, the NVIDIA OpenShell gateway,
+and can-i as an OpenShell sandbox with its dashboard. They're published on this repo's
+`aif/charts` branch. Every cluster you install on needs a CNI that enforces `NetworkPolicy`
+(RKE2's Canal, Calico or Cilium), a default StorageClass, and
+[Landlock enabled](docs/landlock/README.md) on the nodes that run sandboxes. More detail in
+[Kubernetes with Rancher or SUSE AI Factory](#4-kubernetes-with-rancher-or-suse-ai-factory).
 
-### Rancher: add the chart repository
+### Option 1: SUSE AI Factory blueprint (recommended)
 
-Apply this on the Rancher management cluster (**or** paste it into *Apps → Repositories →
-Create → Edit as YAML*). This is also [`catalog/clusterrepo.yaml`](catalog/clusterrepo.yaml).
+The `can-i-openshell` blueprint installs all three charts into one namespace in a single
+deploy.
+
+1. **Add the chart repository** on the cluster you'll deploy to. The blueprint pulls its
+   charts from the `suse-tm-can-i` repo, so this step comes first (it's the same YAML as
+   [Option 2](#option-2-rancher-apps)):
+   ```bash
+   kubectl apply -f https://raw.githubusercontent.com/SUSE-Technical-Marketing/can-i/main/catalog/clusterrepo.yaml
+   ```
+2. **Add the blueprint** on the AI Factory cluster:
+   ```bash
+   kubectl apply -f https://raw.githubusercontent.com/SUSE-Technical-Marketing/can-i/main/catalog/blueprints/can-i-openshell-1-0-1.yaml
+   ```
+3. Go to **AI Factory → Blueprints → can-i in an OpenShell sandbox → Deploy** and pick a
+   namespace.
+
+| Component | Chart | Release |
+|---|---|---|
+| Agent Sandbox CRD + controller | `agent-sandbox` | `agent-sandbox` |
+| OpenShell gateway | `openshell-gateway` | `openshell` |
+| can-i sandbox + dashboard (SUSE BCI image, NodePort) | `can-i` | `can-i` |
+
+Blueprint source: [`catalog/blueprints/can-i-openshell-1-0-1.yaml`](catalog/blueprints/can-i-openshell-1-0-1.yaml),
+listed in [`blueprint-catalog.yaml`](catalog/blueprints/blueprint-catalog.yaml) for the
+operator's catalog sync.
+
+### Option 2: Rancher Apps
+
+Add the chart repository to **each cluster** you want to install on: apply this with
+`kubectl` against that cluster, or paste it into that cluster's *Apps → Repositories →
+Create → Edit as YAML*. A repository added only on the `local` cluster doesn't show up on
+downstream clusters. This is also [`catalog/clusterrepo.yaml`](catalog/clusterrepo.yaml).
 
 ```yaml
 apiVersion: catalog.cattle.io/v1
@@ -34,7 +78,7 @@ Then go to **Apps → Charts** and install, in order: *OpenShell 1 - Agent Sandb
 controller* (once per cluster), *OpenShell 2 - Gateway*, and *OpenShell 3 - can-i sandbox*.
 Install the gateway and can-i in the **same namespace**.
 
-### Helm
+### Option 3: Helm
 
 ```bash
 helm repo add can-i https://raw.githubusercontent.com/SUSE-Technical-Marketing/can-i/aif/charts
@@ -48,18 +92,6 @@ helm install openshell can-i/openshell-gateway -n openshell --create-namespace
 helm install can-i can-i/can-i -n openshell
 
 kubectl -n openshell get svc can-i    # dashboard (NodePort by default)
-```
-
-```
- Host hermes   Kernel 6.12.0-160000.39-default   User erin (uid 1000)
- Container podman   AppArmor unconfined   seccomp filter   Sandboxed YES
-┌─────────┬────────────────────────────┬────────────┬──────┬─────────┐
-│ Status  │ Check                      │ Category   │ Exit │ Latency │
-├─────────┼────────────────────────────┼────────────┼──────┼─────────┤
-│ ALLOWED │ Outbound HTTPS (suse.com)  │ network    │ 0    │ 312 ms  │
-│ DENIED  │ Read /etc/shadow           │ filesystem │ 1    │ 4 ms    │
-│ DENIED  │ Write to /var/tmp          │ filesystem │ 1    │ 3 ms    │
-└─────────┴────────────────────────────┴────────────┴──────┴─────────┘
 ```
 
 ## Probe categories
@@ -258,7 +290,7 @@ The can-i form's **Sandbox image** dropdown picks the OpenShell child container:
 | `custom` | any image with can-i and a uid-10001 user | |
 
 **Publish the charts** to the `aif/charts` branch, which Rancher reads as a git ClusterRepo,
-then register it once per Rancher management cluster:
+then register it on each cluster you install on ([details](#option-2-rancher-apps)):
 ```bash
 scripts/publish-charts.sh --push
 kubectl apply -f catalog/clusterrepo.yaml      # ClusterRepo suse-tm-can-i

@@ -1,4 +1,4 @@
-# Register once per Rancher management cluster (Apps and SUSE AI Factory both
+# Register on each cluster that installs these charts (Apps and SUSE AI Factory both
 # read it). Blueprints reference it as chartRepo: suse-tm-can-i.
 apiVersion: catalog.cattle.io/v1
 kind: ClusterRepo
