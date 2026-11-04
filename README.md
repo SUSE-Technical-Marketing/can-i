@@ -8,6 +8,48 @@
 - **Web UI** — dark-mode dashboard (FastAPI + SSE) with a live `checks.yaml` editor; no restarts needed to change probes.
 - **Everywhere** — runs from a SUSE BCI container image, or installs directly on a host/sandbox via [`mise`](https://mise.jdx.dev) like an agent payload.
 
+## Install on Kubernetes
+
+The charts are published on this repo's `aif/charts` branch. See
+[Kubernetes with Rancher or SUSE AI Factory](#4-kubernetes-with-rancher-or-suse-ai-factory)
+for what each chart does and the cluster requirements (a CNI that enforces `NetworkPolicy`,
+and [Landlock](docs/landlock/README.md) on sandbox nodes).
+
+### Rancher: add the chart repository
+
+Apply this on the Rancher management cluster (**or** paste it into *Apps → Repositories →
+Create → Edit as YAML*). This is also [`catalog/clusterrepo.yaml`](catalog/clusterrepo.yaml).
+
+```yaml
+apiVersion: catalog.cattle.io/v1
+kind: ClusterRepo
+metadata:
+  name: suse-tm-can-i
+spec:
+  gitRepo: https://github.com/SUSE-Technical-Marketing/can-i
+  gitBranch: aif/charts
+```
+
+Then go to **Apps → Charts** and install, in order: *OpenShell 1 - Agent Sandbox
+controller* (once per cluster), *OpenShell 2 - Gateway*, and *OpenShell 3 - can-i sandbox*.
+Install the gateway and can-i in the **same namespace**.
+
+### Helm
+
+```bash
+helm repo add can-i https://raw.githubusercontent.com/SUSE-Technical-Marketing/can-i/aif/charts
+helm repo update
+
+# 1. Agent Sandbox CRD + controller (once per cluster)
+helm install agent-sandbox can-i/agent-sandbox -n agent-sandbox-system --create-namespace
+# 2. OpenShell gateway
+helm install openshell can-i/openshell-gateway -n openshell --create-namespace
+# 3. can-i sandbox + dashboard (same namespace as the gateway)
+helm install can-i can-i/can-i -n openshell
+
+kubectl -n openshell get svc can-i    # dashboard (NodePort by default)
+```
+
 ```
  Host hermes   Kernel 6.12.0-160000.39-default   User erin (uid 1000)
  Container podman   AppArmor unconfined   seccomp filter   Sandboxed YES
@@ -51,7 +93,7 @@ panel says what evidence each guess rests on.
 
 ```bash
 # one-line bootstrap: installs mise if needed, deps, and a can-i shim in ~/.local/bin
-curl -fsSL https://raw.githubusercontent.com/wiredquill/can-i/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/SUSE-Technical-Marketing/can-i/main/install.sh | bash
 
 # or from a checkout:
 mise install            # python 3.13 + uv from .mise.toml
@@ -69,8 +111,8 @@ The [Dockerfile](Dockerfile) is multi-stage and built **strictly on SUSE Base Co
 (the test suite gates the image build; multi-arch `linux/amd64` + `linux/arm64`):
 
 ```bash
-podman pull ghcr.io/wiredquill/can-i:latest
-podman run --rm -p 8000:8000 ghcr.io/wiredquill/can-i:latest
+podman pull ghcr.io/suse-technical-marketing/can-i:latest
+podman run --rm -p 8000:8000 ghcr.io/suse-technical-marketing/can-i:latest
 ```
 
 **Local dev loop** — build on your box (fastest) and share via the LAN registry:
@@ -109,7 +151,7 @@ openshell gateway select local
 
 # launch the can-i image as the sandbox workload, policy attached at creation
 openshell sandbox create --name can-i \
-  --from ghcr.io/wiredquill/can-i:latest \
+  --from ghcr.io/suse-technical-marketing/can-i:latest \
   --policy examples/policy-to-run-can-i.yaml \
   --detach -- can-i web --host 0.0.0.0 --port 8000
 
@@ -120,7 +162,7 @@ openshell forward service --target-port 8000 --local 0.0.0.0:8477 can-i
 # or attach a terminal and drive the TUI yourself — the trailing command is
 # required: without it OpenShell drops you into a shell, not the image entrypoint
 openshell sandbox create --name can-i-tui \
-  --from ghcr.io/wiredquill/can-i:latest \
+  --from ghcr.io/suse-technical-marketing/can-i:latest \
   --policy examples/policy-to-run-can-i.yaml \
   -- can-i tui
 ```
@@ -202,24 +244,24 @@ of its sandboxes. Three Helm charts, each with a Rancher install form (`question
 
 | Chart | What it installs |
 |---|---|
-| [`charts/agent-sandbox`](charts/agent-sandbox) 1.0.10 | **OpenShell 1 - Agent Sandbox controller**: the `Sandbox` CRD + controller OpenShell's Kubernetes driver needs. Install first, **once per cluster** |
-| [`charts/openshell-gateway`](charts/openshell-gateway) 0.1.8 | **OpenShell 2 - Gateway**: NVIDIA's OpenShell 0.1.5 chart (vendored, with a small [form patch](charts/openshell-gateway/nvidia-chart.patch)) and the [openshell-lab](https://github.com/wiredquill/openshell-lab) defaults. Creates no sandbox |
-| [`charts/can-i`](charts/can-i) 0.1.2 | **OpenShell 3 - can-i sandbox**: a client pod (the `openshell` CLI) that creates the can-i sandbox and serves its dashboard |
+| [`charts/agent-sandbox`](charts/agent-sandbox) 1.0.11 | **OpenShell 1 - Agent Sandbox controller**: the `Sandbox` CRD + controller OpenShell's Kubernetes driver needs. Install first, **once per cluster** |
+| [`charts/openshell-gateway`](charts/openshell-gateway) 0.1.9 | **OpenShell 2 - Gateway**: NVIDIA's OpenShell 0.1.5 chart (vendored, with a small [form patch](charts/openshell-gateway/nvidia-chart.patch)) and the [openshell-lab](https://github.com/wiredquill/openshell-lab) defaults. Creates no sandbox |
+| [`charts/can-i`](charts/can-i) 0.1.5 | **OpenShell 3 - can-i sandbox**: a client pod (the `openshell` CLI) that creates the can-i sandbox and serves its dashboard |
 
 The can-i form's **Sandbox image** dropdown picks the OpenShell child container:
 
 | Choice | Image | Base |
 |---|---|---|
-| `suse` | `ghcr.io/wiredquill/can-i` | SUSE BCI Python 3.13 ([Dockerfile](Dockerfile)) |
-| `opensuse` | `ghcr.io/wiredquill/can-i-opensuse` | openSUSE Leap 16.0 ([images/opensuse](images/opensuse/Dockerfile)) |
-| `nvidia` | `ghcr.io/wiredquill/can-i-nvidia` | `nvcr.io/nvidia/base/ubuntu:24.04`, NVIDIA's default sandbox base ([images/nvidia](images/nvidia/Dockerfile)) |
+| `suse` | `ghcr.io/suse-technical-marketing/can-i` | SUSE BCI Python 3.13 ([Dockerfile](Dockerfile)) |
+| `opensuse` | `ghcr.io/suse-technical-marketing/can-i-opensuse` | openSUSE Leap 16.0 ([images/opensuse](images/opensuse/Dockerfile)) |
+| `nvidia` | `ghcr.io/suse-technical-marketing/can-i-nvidia` | `nvcr.io/nvidia/base/ubuntu:24.04`, NVIDIA's default sandbox base ([images/nvidia](images/nvidia/Dockerfile)) |
 | `custom` | any image with can-i and a uid-10001 user | |
 
 **Publish the charts** to the `aif/charts` branch, which Rancher reads as a git ClusterRepo,
 then register it once per Rancher management cluster:
 ```bash
 scripts/publish-charts.sh --push
-kubectl apply -f catalog/clusterrepo.yaml      # ClusterRepo wiredquill-can-i
+kubectl apply -f catalog/clusterrepo.yaml      # ClusterRepo suse-tm-can-i
 ```
 
 **Install with Rancher Apps:** install *OpenShell 1 - Agent Sandbox controller* (once per

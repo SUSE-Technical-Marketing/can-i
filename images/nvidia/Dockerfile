@@ -19,7 +19,7 @@ RUN python3 -m venv --without-pip /opt/can-i \
 FROM nvcr.io/nvidia/base/ubuntu:24.04
 LABEL org.opencontainers.image.title="can-i (NVIDIA base Ubuntu 24.04)" \
       org.opencontainers.image.description="Security capability inspector and sandbox demo dashboard (TUI + Web)" \
-      org.opencontainers.image.source="https://github.com/wiredquill/can-i"
+      org.opencontainers.image.source="https://github.com/SUSE-Technical-Marketing/can-i"
 
 # curl/getent/unshare/ping/nmap back the default probes
 RUN apt-get update \

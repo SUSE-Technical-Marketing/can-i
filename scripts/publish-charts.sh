@@ -11,7 +11,6 @@
 set -euo pipefail
 
 BRANCH=aif/charts
-URL=https://github.com/wiredquill/can-i
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 PUSH=${1:-}
 
@@ -49,7 +48,10 @@ if [ -z "$(git status --porcelain -- '*.tgz')" ]; then
   echo "nothing new to publish"
   exit 0
 fi
-helm repo index . --url "$URL"
+# relative chart URLs: Rancher reads the .tgz files from its git clone, and
+# `helm repo add <raw.githubusercontent.com/.../aif/charts>` resolves them
+# against the repo URL
+helm repo index .
 git add index.yaml ./*.tgz
 git commit -q -m "Publish charts: $(ls ./*.tgz | xargs -n1 basename | tr '\n' ' ')"
 git log --oneline -1

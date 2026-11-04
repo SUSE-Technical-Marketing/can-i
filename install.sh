@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # can-i one-line bootstrap installer (native / AI-agent payload style).
 #
-#   curl -fsSL https://raw.githubusercontent.com/wiredquill/can-i/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/SUSE-Technical-Marketing/can-i/main/install.sh | bash
 #
 # Sets up mise (if absent), resolves tool dependencies, installs can-i,
 # and drops a `can-i` shim into ~/.local/bin.
 set -euo pipefail
 
-REPO_URL="${CAN_I_REPO:-https://github.com/wiredquill/can-i.git}"
+REPO_URL="${CAN_I_REPO:-https://github.com/SUSE-Technical-Marketing/can-i.git}"
 INSTALL_DIR="${CAN_I_HOME:-$HOME/.local/share/can-i}"
 BIN_DIR="$HOME/.local/bin"
 

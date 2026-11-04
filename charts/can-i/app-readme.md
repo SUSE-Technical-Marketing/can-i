@@ -2,7 +2,7 @@
 
 What can the agent do?
 
-[can-i](https://github.com/wiredquill/can-i) runs a set of harmless probes (network egress,
+[can-i](https://github.com/SUSE-Technical-Marketing/can-i) runs a set of harmless probes (network egress,
 sensitive files, spawning processes, privilege escalation) and shows live which ones the
 sandbox **allows** and which it **denies**. Here it runs as the workload of an
 **OpenShell sandbox**, so the dashboard shows exactly what the OpenShell policy lets an

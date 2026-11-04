@@ -51,9 +51,9 @@ questions:
   default: ghcr.io/wiredquill/openshell-lab/leap
   options:
     - ghcr.io/wiredquill/openshell-lab/leap
-    - ghcr.io/wiredquill/can-i
-    - ghcr.io/wiredquill/can-i-opensuse
-    - ghcr.io/wiredquill/can-i-nvidia
+    - ghcr.io/suse-technical-marketing/can-i
+    - ghcr.io/suse-technical-marketing/can-i-opensuse
+    - ghcr.io/suse-technical-marketing/can-i-nvidia
     - nvcr.io/nvidia/base/ubuntu
   description: >-
     Only a default: this app creates no sandbox. Used when openshell sandbox create has no --from;

@@ -25,7 +25,7 @@ RUN set -eu; \
 FROM registry.suse.com/bci/bci-base:16.0
 LABEL org.opencontainers.image.title="can-i client" \
       org.opencontainers.image.description="openshell CLI that runs can-i as an OpenShell sandbox and forwards its dashboard" \
-      org.opencontainers.image.source="https://github.com/wiredquill/can-i"
+      org.opencontainers.image.source="https://github.com/SUSE-Technical-Marketing/can-i"
 COPY --from=cli /usr/local/bin/openshell /usr/local/bin/openshell
 COPY can-i-client /usr/local/bin/can-i-client
 # openshell sandbox connect runs the ssh client

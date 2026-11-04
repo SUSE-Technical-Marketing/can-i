@@ -12,7 +12,7 @@ RUN pip install --no-cache-dir --prefix=/install .
 FROM registry.suse.com/bci/python:3.13
 LABEL org.opencontainers.image.title="can-i" \
       org.opencontainers.image.description="Security capability inspector and sandbox demo dashboard (TUI + Web)" \
-      org.opencontainers.image.source="https://github.com/wiredquill/can-i"
+      org.opencontainers.image.source="https://github.com/SUSE-Technical-Marketing/can-i"
 
 # ping and nmap so their probes are denied by the sandbox, not by a missing binary
 RUN zypper -n install --no-recommends iputils nmap && zypper -n clean -a
