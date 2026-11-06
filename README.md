@@ -22,10 +22,11 @@
 
 ## Install on Kubernetes
 
-Three charts make up the lab: the Agent Sandbox controller, the NVIDIA OpenShell gateway,
-and can-i as an OpenShell sandbox with its dashboard. They're published on this repo's
-`aif/charts` branch. Every cluster you install on needs a CNI that enforces `NetworkPolicy`
-(RKE2's Canal, Calico or Cilium), a default StorageClass, and
+Three charts make up the lab. The Agent Sandbox controller and the NVIDIA OpenShell gateway
+come from [wiredquill/openshell](https://github.com/wiredquill/openshell), which also hosts
+other OpenShell apps (Hermes Agent). can-i, which runs as an OpenShell sandbox with its
+dashboard, is published from this repo. Every cluster you install on needs a CNI that
+enforces `NetworkPolicy` (RKE2's Canal, Calico or Cilium), a default StorageClass, and
 [Landlock enabled](docs/landlock/README.md) on the nodes that run sandboxes. More detail in
 [Kubernetes with Rancher or SUSE AI Factory](#4-kubernetes-with-rancher-or-suse-ai-factory).
 
@@ -34,37 +35,50 @@ and can-i as an OpenShell sandbox with its dashboard. They're published on this 
 The `can-i-openshell` blueprint installs all three charts into one namespace in a single
 deploy.
 
-1. **Add the chart repository** on the cluster you'll deploy to. The blueprint pulls its
-   charts from the `suse-tm-can-i` repo, so this step comes first (it's the same YAML as
-   [Option 2](#option-2-rancher-apps)):
-   ```bash
-   kubectl apply -f https://raw.githubusercontent.com/SUSE-Technical-Marketing/can-i/main/catalog/clusterrepo.yaml
-   ```
-2. **Add the blueprint** on the AI Factory cluster:
-   ```bash
-   kubectl apply -f https://raw.githubusercontent.com/SUSE-Technical-Marketing/can-i/main/catalog/blueprints/can-i-openshell-1-0-1.yaml
-   ```
-3. Go to **AI Factory → Blueprints → can-i in an OpenShell sandbox → Deploy** and pick a
+1. **Add both chart repositories** to the Rancher `local` cluster, where AI Factory runs:
+   the YAML in [Option 2](#option-2-rancher-apps). The blueprint installs from
+   `wiredquill-openshell` and `suse-tm-can-i` by those exact names.
+2. **Register this repo's blueprint catalog** in **AI Factory → Settings → Custom Catalogs
+   → Add Catalog**:
+
+   | Field | Value |
+   |---|---|
+   | Name | `can-i` |
+   | Repository URL | `https://github.com/SUSE-Technical-Marketing/can-i` |
+   | Branch | `main` |
+   | Paths | `catalog/blueprints` |
+
+   The name must be `can-i`, the `metadata.name` in
+   [`blueprint-catalog.yaml`](catalog/blueprints/blueprint-catalog.yaml). Use branch
+   `main`: `aif/charts` holds only packaged charts. AI Factory lists only blueprints that
+   a registered catalog names, so a blueprint added with `kubectl apply` won't appear.
+3. Go to **AI Factory → Blueprints → can-i in an OpenShell sandbox → Install** and pick a
    namespace.
 
-| Component | Chart | Release |
-|---|---|---|
-| Agent Sandbox CRD + controller | `agent-sandbox` | `agent-sandbox` |
-| OpenShell gateway | `openshell-gateway` | `openshell` |
-| can-i sandbox + dashboard (SUSE BCI image, NodePort) | `can-i` | `can-i` |
-
-Blueprint source: [`catalog/blueprints/can-i-openshell-1-0-1.yaml`](catalog/blueprints/can-i-openshell-1-0-1.yaml),
-listed in [`blueprint-catalog.yaml`](catalog/blueprints/blueprint-catalog.yaml) for the
-operator's catalog sync.
+| Component | Chart | From | Release |
+|---|---|---|---|
+| Agent Sandbox CRD + controller | `agent-sandbox` | `wiredquill-openshell` | `agent-sandbox` |
+| OpenShell gateway | `openshell-gateway` | `wiredquill-openshell` | `openshell` |
+| can-i sandbox + dashboard (SUSE BCI image, NodePort) | `can-i` | `suse-tm-can-i` | `can-i` |
 
 ### Option 2: Rancher Apps
 
-Add the chart repository to **each cluster** you want to install on: apply this with
+Add both chart repositories to **each cluster** you want to install on: apply this with
 `kubectl` against that cluster, or paste it into that cluster's *Apps → Repositories →
 Create → Edit as YAML*. A repository added only on the `local` cluster doesn't show up on
-downstream clusters. This is also [`catalog/clusterrepo.yaml`](catalog/clusterrepo.yaml).
+downstream clusters. Keep these names: the blueprint refers to them.
 
 ```yaml
+# OpenShell: Agent Sandbox controller + gateway (also Hermes Agent)
+apiVersion: catalog.cattle.io/v1
+kind: ClusterRepo
+metadata:
+  name: wiredquill-openshell
+spec:
+  gitRepo: https://github.com/wiredquill/openshell
+  gitBranch: aif/charts
+---
+# can-i (this repo; also catalog/clusterrepo.yaml)
 apiVersion: catalog.cattle.io/v1
 kind: ClusterRepo
 metadata:
@@ -81,13 +95,14 @@ Install the gateway and can-i in the **same namespace**.
 ### Option 3: Helm
 
 ```bash
+helm repo add openshell https://raw.githubusercontent.com/wiredquill/openshell/aif/charts
 helm repo add can-i https://raw.githubusercontent.com/SUSE-Technical-Marketing/can-i/aif/charts
 helm repo update
 
 # 1. Agent Sandbox CRD + controller (once per cluster)
-helm install agent-sandbox can-i/agent-sandbox -n agent-sandbox-system --create-namespace
+helm install agent-sandbox openshell/agent-sandbox -n agent-sandbox-system --create-namespace
 # 2. OpenShell gateway
-helm install openshell can-i/openshell-gateway -n openshell --create-namespace
+helm install openshell openshell/openshell-gateway -n openshell --create-namespace
 # 3. can-i sandbox + dashboard (same namespace as the gateway)
 helm install can-i can-i/can-i -n openshell
 
@@ -276,9 +291,9 @@ of its sandboxes. Three Helm charts, each with a Rancher install form (`question
 
 | Chart | What it installs |
 |---|---|
-| [`charts/agent-sandbox`](charts/agent-sandbox) 1.0.11 | **OpenShell 1 - Agent Sandbox controller**: the `Sandbox` CRD + controller OpenShell's Kubernetes driver needs. Install first, **once per cluster** |
-| [`charts/openshell-gateway`](charts/openshell-gateway) 0.1.9 | **OpenShell 2 - Gateway**: NVIDIA's OpenShell 0.1.5 chart (vendored, with a small [form patch](charts/openshell-gateway/nvidia-chart.patch)) and the [openshell-lab](https://github.com/wiredquill/openshell-lab) defaults. Creates no sandbox |
-| [`charts/can-i`](charts/can-i) 0.1.5 | **OpenShell 3 - can-i sandbox**: a client pod (the `openshell` CLI) that creates the can-i sandbox and serves its dashboard |
+| `agent-sandbox` ([wiredquill/openshell](https://github.com/wiredquill/openshell/tree/main/charts/agent-sandbox)) | **OpenShell 1 - Agent Sandbox controller**: the `Sandbox` CRD + controller OpenShell's Kubernetes driver needs. Install first, **once per cluster** |
+| `openshell-gateway` ([wiredquill/openshell](https://github.com/wiredquill/openshell/tree/main/charts/openshell-gateway)) | **OpenShell 2 - Gateway**: NVIDIA's OpenShell 0.1.5 chart (vendored, with a small form patch) and lab defaults. Creates no sandbox |
+| [`charts/can-i`](charts/can-i) | **OpenShell 3 - can-i sandbox**: a client pod (the `openshell` CLI) that creates the can-i sandbox and serves its dashboard |
 
 The can-i form's **Sandbox image** dropdown picks the OpenShell child container:
 
@@ -289,26 +304,21 @@ The can-i form's **Sandbox image** dropdown picks the OpenShell child container:
 | `nvidia` | `ghcr.io/suse-technical-marketing/can-i-nvidia` | `nvcr.io/nvidia/base/ubuntu:24.04`, NVIDIA's default sandbox base ([images/nvidia](images/nvidia/Dockerfile)) |
 | `custom` | any image with can-i and a uid-10001 user | |
 
-**Publish the charts** to the `aif/charts` branch, which Rancher reads as a git ClusterRepo,
-then register it on each cluster you install on ([details](#option-2-rancher-apps)):
+**Publish the can-i chart** to the `aif/charts` branch, which Rancher reads as a git
+ClusterRepo. Bump `version` in `charts/can-i/Chart.yaml` first: published versions are
+immutable. Register both repositories as in [Option 2](#option-2-rancher-apps).
 ```bash
 scripts/publish-charts.sh --push
-kubectl apply -f catalog/clusterrepo.yaml      # ClusterRepo suse-tm-can-i
 ```
 
 **Install with Rancher Apps:** install *OpenShell 1 - Agent Sandbox controller* (once per
 cluster), then *OpenShell 2 - Gateway*, then *OpenShell 3 - can-i sandbox* in the **same
 namespace** as the gateway (can-i reads its `openshell-client-tls` Secret). The gateway alone
 runs no sandbox; the can-i app creates it. The architecture diagram is in
-[`charts/agent-sandbox/README.md`](charts/agent-sandbox/README.md#architecture).
+[openshell's `charts/agent-sandbox/README.md`](https://github.com/wiredquill/openshell/blob/main/charts/agent-sandbox/README.md#architecture).
 
-**Or deploy the AI Factory blueprint**, which installs all three into one namespace:
-```bash
-kubectl apply -f catalog/blueprints/can-i-openshell-1-0-1.yaml
-```
-Then go to **AI Factory → Blueprints → can-i in an OpenShell sandbox → Deploy**.
-[`catalog/blueprints/blueprint-catalog.yaml`](catalog/blueprints/blueprint-catalog.yaml)
-lists it for the operator's catalog sync.
+**Or install the AI Factory blueprint**, which installs all three into one namespace: see
+[Option 1](#option-1-suse-ai-factory-blueprint-recommended).
 
 **Drive the demo** through the client pod, which also works as your `openshell` CLI:
 ```bash
@@ -423,10 +433,9 @@ The suite covers probe-engine timeout/exit-code/output handling, YAML schema val
 ├── install.sh             # one-line bootstrap (mise-based)
 ├── Dockerfile             # multi-stage, SUSE BCI (the default image)
 ├── images/                # opensuse/ and nvidia/ variants, client/ (openshell CLI pod)
-├── charts/                # agent-sandbox, openshell-gateway, can-i (Rancher forms)
+├── charts/can-i/          # can-i Helm chart (Rancher form); OpenShell charts live in wiredquill/openshell
 ├── catalog/               # SUSE AI Factory blueprint + Rancher ClusterRepo
 ├── scripts/publish-charts.sh  # package charts onto the aif/charts branch
-├── scripts/vendor-openshell-chart.sh  # re-vendor NVIDIA's chart + patch
 ├── pyproject.toml
 ├── examples/openshell-policy.yaml   # sample policy for from-policy
 ├── src/cani/

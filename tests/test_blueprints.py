@@ -10,6 +10,11 @@ CLUSTER_REPO = yaml.safe_load((ROOT / "catalog" / "clusterrepo.yaml").read_text(
 CATALOG = yaml.safe_load((ROOT / "catalog" / "blueprints" / "blueprint-catalog.yaml").read_text())
 
 
+# Charts this repo doesn't publish: the OpenShell infrastructure charts come from
+# wiredquill/openshell (ClusterRepo wiredquill-openshell).
+EXTERNAL = {"agent-sandbox": "wiredquill-openshell", "openshell-gateway": "wiredquill-openshell"}
+
+
 def chart_version(name: str) -> str:
     return yaml.safe_load((ROOT / "charts" / name / "Chart.yaml").read_text())["version"]
 
@@ -18,9 +23,14 @@ def chart_version(name: str) -> str:
 def test_components_pin_current_chart_versions(path):
     bp = yaml.safe_load(path.read_text())
     for c in bp["spec"]["components"]:
-        assert c["chartRepo"] == CLUSTER_REPO, c["chartName"]
+        name = c["chartName"]
+        if name in EXTERNAL:
+            assert c["chartRepo"] == EXTERNAL[name], name
+            assert not (ROOT / "charts" / name).exists(), f"{name} is published from openshell, not here"
+            continue
+        assert c["chartRepo"] == CLUSTER_REPO, name
         # publish-charts.sh ships the current Chart.yaml version; older pins 404
-        assert c["chartVersion"] == chart_version(c["chartName"]), c["chartName"]
+        assert c["chartVersion"] == chart_version(name), name
 
 
 @pytest.mark.parametrize("path", BLUEPRINTS, ids=lambda p: p.name)
