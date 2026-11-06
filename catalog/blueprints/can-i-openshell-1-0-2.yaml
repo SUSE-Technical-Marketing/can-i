@@ -3,12 +3,12 @@ kind: Blueprint
 metadata:
   labels:
     ai-factory.suse.com/blueprint-name: can-i-openshell
-    ai-factory.suse.com/blueprint-version: 1.0.1
-  name: can-i-openshell-1-0-1
+    ai-factory.suse.com/blueprint-version: 1.0.2
+  name: can-i-openshell-1-0-2
 spec:
   source: Custom  # community, unsupported demo
   displayName: can-i in an OpenShell sandbox
-  version: 1.0.1
+  version: 1.0.2
   description: |
     Shows what an AI agent can and can't do inside an NVIDIA OpenShell 0.1.5
     sandbox, and how that changes as you grant access. can-i runs as the
@@ -31,12 +31,14 @@ spec:
   components:
     # Install everything into one namespace: can-i reads the gateway's
     # openshell-client-tls Secret and calls https://openshell:8080.
+    # agent-sandbox and openshell-gateway come from wiredquill/openshell
+    # (ClusterRepo wiredquill-openshell); only can-i is published from this repo.
     - chartName: agent-sandbox
-      chartRepo: suse-tm-can-i
+      chartRepo: wiredquill-openshell
       chartVersion: "1.0.11"
       releaseName: agent-sandbox
     - chartName: openshell-gateway
-      chartRepo: suse-tm-can-i
+      chartRepo: wiredquill-openshell
       chartVersion: "0.1.9"
       releaseName: openshell
       values:

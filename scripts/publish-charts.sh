@@ -44,6 +44,16 @@ for t in "$WORK"/pkg/*.tgz; do
     cp "$t" .
   fi
 done
+# drop charts no longer in charts/ (e.g. agent-sandbox and openshell-gateway,
+# now published from wiredquill/openshell), so Rancher doesn't list them twice
+for t in ./*.tgz; do
+  [ -e "$t" ] || continue
+  chart=$(basename "$t" | sed -E 's/-[0-9]+\.[0-9]+\.[0-9]+[^/]*\.tgz$//')
+  if [ ! -d "$ROOT/charts/$chart" ]; then
+    echo "remove $(basename "$t"): charts/$chart no longer exists"
+    git rm -q "$t"
+  fi
+done
 if [ -z "$(git status --porcelain -- '*.tgz')" ]; then
   echo "nothing new to publish"
   exit 0
@@ -52,7 +62,7 @@ fi
 # `helm repo add <raw.githubusercontent.com/.../aif/charts>` resolves them
 # against the repo URL
 helm repo index .
-git add index.yaml ./*.tgz
+git add -A index.yaml ./*.tgz
 git commit -q -m "Publish charts: $(ls ./*.tgz | xargs -n1 basename | tr '\n' ' ')"
 git log --oneline -1
 if [ "$PUSH" = --push ]; then
