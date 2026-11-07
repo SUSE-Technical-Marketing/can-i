@@ -38,8 +38,8 @@ deploy.
 1. **Add both chart repositories** to the Rancher `local` cluster, where AI Factory runs:
    the YAML in [Option 2](#option-2-rancher-apps). The blueprint installs from
    `wiredquill-openshell` and `suse-tm-can-i` by those exact names.
-2. **Register this repo's blueprint catalog** in **AI Factory → Settings → Custom Catalogs
-   → Add Catalog**:
+2. **Register this repo's blueprint catalog** in **AI Factory → Settings → Blueprint
+   Catalogs → Custom Catalogs → Add Catalog**:
 
    | Field | Value |
    |---|---|
@@ -53,7 +53,9 @@ deploy.
    `main`: `aif/charts` holds only packaged charts. AI Factory lists only blueprints that
    a registered catalog names, so a blueprint added with `kubectl apply` won't appear.
 3. Go to **AI Factory → Blueprints → can-i in an OpenShell sandbox → Install** and pick a
-   namespace.
+   namespace. To change any setting, use the YAML tab of the Customize step. The wizard
+   (aif-ui 2.4.0) drops changes made in the form view unless you then make any edit in
+   the YAML tab, and the Review step must list the component as customized.
 
 | Component | Chart | From | Release |
 |---|---|---|---|
