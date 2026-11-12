@@ -336,6 +336,39 @@ lab. For direct access, set its Service to NodePort or LoadBalancer and put the 
 dial in **Extra certificate names**: the CLI checks the gateway's certificate against it.
 Sandboxes are never exposed; you reach them through the gateway.
 
+**Policy profiles and grants.** The form's **Policy profile** dropdown sets the starting
+policy, one demo scene each, and the **grants** tick boxes add one grant at a time to any
+profile. Each grant flips the probe named in its description from DENIED to ALLOWED.
+
+| Profile | Network (curl unless noted) | Filesystem |
+|---|---|---|
+| `custom` (default) | `policy.egress` as set (default `suse.com:443`) and the grants below | as set |
+| `locked-down` | none | |
+| `suse-only` | suse.com | |
+| `web-read` | + opensuse.org, one.one.one.one | |
+| `agent-installer` | + python to pypi.org and files.pythonhosted.org | |
+| `everything` | + nmap to suse.com | + read `/srv/can-i-tools`, write `/var/tmp` |
+
+| `policy.grants.` | Adds | Probe it flips |
+|---|---|---|
+| `opensuse` | curl to opensuse.org:443 | |
+| `cloudflare` | curl to one.one.one.one:443 | HTTPS to one.one.one.one |
+| `pypi` | python to pypi.org | Upstream PyPI |
+| `susePypi` | python to the host of `checks.susePypiUrl` | SUSE PyPI |
+| `nmap` | nmap to suse.com:443 | Port scan suse.com:443 |
+| `agentTools` | read-only `/srv/can-i-tools` | Run a tool from /srv/can-i-tools |
+| `varTmp` | read-write `/var/tmp` | Write to /var/tmp |
+
+`policy.extraYaml` adds whole `network_policies` rules for anything else, and
+`policy.extraReadOnly` / `extraReadWrite` add paths. The profiles and grants are data in
+`charts/can-i/policy-profiles.yaml` and `policy-grants.yaml`: edit them, or add a grant
+and a matching `policy.grants.<key>` value, to offer another. Each binary other than curl
+gets its own rule (`can-i-python3`, `can-i-nmap`), because OpenShell refuses an endpoint
+added to a rule that lists binaries it doesn't know. To see the policy before you deploy:
+```bash
+scripts/preview-policy.sh --set policy.profile=web-read --set policy.grants.pypi=true
+```
+
 Changing the image or starting policy in the form recreates the sandbox. The cluster needs
 a CNI that enforces `NetworkPolicy`, and every node that runs sandboxes needs Landlock
 enabled ([how](docs/landlock/README.md)). If Agent Sandbox was already installed with

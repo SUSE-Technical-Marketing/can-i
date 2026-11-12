@@ -23,13 +23,35 @@ sandbox:
 # OpenShell policy for the sandbox: the grants can-i's probes need, nothing
 # more. Everything the dashboard shows as DENIED is denied by omission.
 policy:
-  # Comma-separated host:port that /usr/bin/curl may reach (L4 + TLS).
+  # Starting point, from policy-profiles.yaml:
+  #   custom           policy.egress and the grants below, as set (the default)
+  #   locked-down      no network at all
+  #   suse-only        curl reaches suse.com (what can-i started with)
+  #   web-read         + opensuse.org and one.one.one.one
+  #   agent-installer  + python reading PyPI
+  #   everything       every grantable probe is ALLOWED
+  # Any profile can be widened with the grants and extra lines below.
+  # `scripts/preview-policy.sh` prints the resulting policy before you deploy.
+  profile: custom
+  # Comma-separated host:port that /usr/bin/curl may reach (L4 + TLS). Used by the
+  # custom profile; the others set their own.
   egress: "suse.com:443"
   # Extra comma-separated paths, e.g. "/data" (applied when the sandbox starts).
   extraReadOnly: ""
   extraReadWrite: ""
   # Must exist in the image; all can-i images ship user cani (10001).
   runAsUser: "10001"
+  # Grants added to the profile (policy-grants.yaml); each flips a probe to ALLOWED.
+  grants:
+    opensuse: false     # curl -> opensuse.org:443
+    cloudflare: false   # curl -> one.one.one.one:443
+    pypi: false         # python -> pypi.org
+    susePypi: false     # python -> the host of checks.susePypiUrl (set that too)
+    nmap: false         # nmap -> suse.com:443
+    agentTools: false   # /srv/can-i-tools readable and runnable (needs a recreate)
+    varTmp: false       # /var/tmp writable (needs a recreate)
+  # Whole network_policies rules as YAML (a map of rule name to rule), added last.
+  extraYaml: ""
 
 checks:
   # A package index URL for the "SUSE PyPI (python)" check, e.g. a project

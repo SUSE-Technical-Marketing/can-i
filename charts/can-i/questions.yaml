@@ -45,14 +45,75 @@ questions:
   default: true
   description: On, changes to the image or policy here take effect on upgrade. Off, a running sandbox is reused and keeps policy changes made with the CLI.
 
+- variable: policy.profile
+  label: Policy profile
+  group: Starting policy
+  type: enum
+  default: custom
+  options:
+    - custom
+    - locked-down
+    - suse-only
+    - web-read
+    - agent-installer
+    - everything
+  description: >-
+    The starting policy, one demo scene each. custom: the egress list and grants below, as set (the default).
+    locked-down: no network at all. suse-only: curl reaches suse.com. web-read: plus opensuse.org and one.one.one.one.
+    agent-installer: plus python reading PyPI, the way an agent installs packages. everything: every probe a policy
+    can grant is ALLOWED. The grants and extra lines below are added to any profile. Network rules can also be
+    changed live with openshell policy update.
+- variable: policy.grants.opensuse
+  label: Grant curl to opensuse.org
+  group: Starting policy
+  type: boolean
+  default: false
+  description: Adds opensuse.org:443 to curl's egress rule.
+- variable: policy.grants.cloudflare
+  label: Grant curl to one.one.one.one
+  group: Starting policy
+  type: boolean
+  default: false
+  description: Flips the "HTTPS to one.one.one.one" probe to ALLOWED.
+- variable: policy.grants.pypi
+  label: Grant python to PyPI
+  group: Starting policy
+  type: boolean
+  default: false
+  description: Lets python reach pypi.org and files.pythonhosted.org, so "Upstream PyPI" turns ALLOWED.
+- variable: policy.grants.susePypi
+  label: Grant python to the SUSE PyPI index
+  group: Starting policy
+  type: boolean
+  default: false
+  description: Lets python reach the host of the SUSE PyPI index URL below. Set that URL too.
+- variable: policy.grants.nmap
+  label: Grant nmap to suse.com
+  group: Starting policy
+  type: boolean
+  default: false
+  description: Gives nmap its own rule for suse.com:443, so the port-scan probe turns ALLOWED.
+- variable: policy.grants.agentTools
+  label: Grant /srv/can-i-tools
+  group: Starting policy
+  type: boolean
+  default: false
+  description: Adds /srv/can-i-tools to the read-only paths, so the unapproved-tool probe can run. Fixed when the sandbox is created.
+- variable: policy.grants.varTmp
+  label: Grant write to /var/tmp
+  group: Starting policy
+  type: boolean
+  default: false
+  description: Adds /var/tmp to the read-write paths. Fixed when the sandbox is created.
 - variable: policy.egress
   label: Allowed egress (curl)
   group: Starting policy
   type: string
   default: "suse.com:443"
+  show_if: "policy.profile=custom"
   description: >-
-    Comma-separated host:port that /usr/bin/curl may reach, e.g. suse.com:443,opensuse.org:443.
-    Leave blank to start with all network access denied. Network rules can also be changed live with
+    Comma-separated host:port that /usr/bin/curl may reach, e.g. suse.com:443,opensuse.org:443. Used by the custom
+    profile; the other profiles set their own. Leave blank to start with all network access denied. Network rules can also be changed live with
     openshell policy update.
 - variable: policy.extraReadOnly
   label: Extra read-only paths
@@ -66,6 +127,15 @@ questions:
   type: string
   default: ""
   description: Comma-separated paths added to filesystem_policy.read_write.
+
+- variable: policy.extraYaml
+  label: Extra network rules (YAML)
+  group: Starting policy
+  type: multiline
+  default: ""
+  description: >-
+    Whole network_policies rules for anything the grants can't say, as a map of rule name to rule (endpoints and
+    binaries), added last. Give each binary its own rule. Changing any policy option recreates the sandbox.
 
 - variable: checks.susePypiUrl
   label: SUSE PyPI index URL
