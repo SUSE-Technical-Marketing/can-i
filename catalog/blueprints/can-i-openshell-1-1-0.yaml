@@ -3,12 +3,12 @@ kind: Blueprint
 metadata:
   labels:
     ai-factory.suse.com/blueprint-name: can-i-openshell
-    ai-factory.suse.com/blueprint-version: 1.0.2
-  name: can-i-openshell-1-0-2
+    ai-factory.suse.com/blueprint-version: 1.1.0
+  name: can-i-openshell-1-1-0
 spec:
   source: Custom  # community, unsupported demo
   displayName: can-i in an OpenShell sandbox
-  version: 1.0.2
+  version: 1.1.0
   description: |
     Shows what an AI agent can and can't do inside an NVIDIA OpenShell 0.1.5
     sandbox, and how that changes as you grant access. can-i runs as the
@@ -28,6 +28,15 @@ spec:
     (RKE2's Canal/Calico/Cilium do), a default StorageClass for the gateway
     database, and no earlier Agent Sandbox install (kubectl apply of
     sandbox.yaml) that Helm would conflict with.
+
+    1.1.0 adds a Policy profile dropdown for can-i (custom, locked-down,
+    suse-only, web-read, agent-installer, everything) and grants you can tick
+    on top of any profile (opensuse, cloudflare, pypi, susePypi, nmap,
+    agentTools, varTmp), plus extra network rules as YAML. Set them in the YAML
+    tab of the Customize step, under the can-i component's values, e.g.
+      policy:
+        profile: web-read
+        grants: {pypi: true}
   components:
     # Install everything into one namespace: can-i reads the gateway's
     # openshell-client-tls Secret and calls https://openshell:8080.
@@ -51,7 +60,7 @@ spec:
               enabled: false
     - chartName: can-i
       chartRepo: suse-tm-can-i
-      chartVersion: "0.1.5"
+      chartVersion: "0.2.0"
       releaseName: can-i
       values:
         sandbox:

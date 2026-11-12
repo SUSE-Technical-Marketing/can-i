@@ -43,14 +43,17 @@ def _endpoint_check(endpoint: dict, binary: str) -> Check | None:
     url = f"{scheme}://{host}"
     if port and port not in (80, 443):
         url += f":{port}"
-    tool = binary.rsplit("/", 1)[-1] if "/" in binary else binary
+    tool = (binary.rsplit("/", 1)[-1] if "/" in binary else binary).rstrip("*")  # python3* -> python3
     if tool != "curl":
         command = f"{tool} {url}"  # best effort for non-curl binaries
     else:
         command = f"curl -fsS --max-time 3 -o /dev/null {url}"
+    # the same host can be granted to several binaries (curl and nmap, each in
+    # its own rule), so a non-curl grant's id and name carry the binary
+    suffix = "" if tool == "curl" else f"-{_slug(tool)}"
     return Check(
-        id=f"net-allow-{_slug(host)}",
-        name=f"Egress allowed: {host}",
+        id=f"net-allow-{_slug(host)}{suffix}",
+        name=f"Egress allowed: {host}" + ("" if tool == "curl" else f" ({tool})"),
         category="network",
         command=command,
         expect="allowed",

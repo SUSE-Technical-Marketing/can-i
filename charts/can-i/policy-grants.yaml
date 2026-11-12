@@ -1,0 +1,43 @@
+# Grants the install form can add to any profile (Policy > grants, as
+# policy.grants.<key>). Each one flips one or more can-i probes from DENIED to
+# ALLOWED. Keys:
+#   curl         host:port pairs added to the can-i-egress rule (/usr/bin/curl)
+#   network      whole rules, one per binary: OpenShell refuses an endpoint added
+#                to a rule that already lists binaries it doesn't know
+#   readOnly / readWrite   filesystem paths, fixed when the sandbox is created
+# Edit or add entries, and a policy.grants.<key> value to offer another.
+opensuse:
+  description: curl may reach opensuse.org:443 (the DNS probe's host)
+  curl: ["opensuse.org:443"]
+cloudflare:
+  description: curl may reach one.one.one.one:443 (flips "HTTPS to one.one.one.one")
+  curl: ["one.one.one.one:443"]
+pypi:
+  description: python may read pypi.org (flips "Upstream PyPI")
+  network:
+    can-i-python3:
+      name: can-i-python3
+      endpoints:
+        - {host: pypi.org, port: 443}
+        - {host: files.pythonhosted.org, port: 443}
+      binaries:
+        - {path: "/usr/bin/python3*"}
+        - {path: "/opt/**/bin/python3*"}
+susePypi:
+  description: python may read SUSE's package index (host of checks.susePypiUrl; set that URL too)
+  pythonFromUrl: true
+nmap:
+  description: nmap may reach suse.com:443 (flips "Port scan suse.com:443")
+  network:
+    can-i-nmap:
+      name: can-i-nmap
+      endpoints:
+        - {host: suse.com, port: 443}
+      binaries:
+        - {path: /usr/bin/nmap}
+agentTools:
+  description: /srv/can-i-tools is readable and runnable (flips "Run a tool from /srv/can-i-tools")
+  readOnly: [/srv/can-i-tools]
+varTmp:
+  description: /var/tmp is writable (flips "Write to /var/tmp")
+  readWrite: [/var/tmp]

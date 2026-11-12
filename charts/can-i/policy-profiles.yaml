@@ -1,0 +1,27 @@
+# Starting points for the sandbox policy, picked with policy.profile. A profile
+# sets the curl egress (unless it has no `egress` key: custom keeps
+# policy.egress) and switches on grants from policy-grants.yaml. policy.grants.*,
+# policy.extraReadOnly/extraReadWrite and policy.extraYaml are added to any profile.
+custom:
+  description: Whatever policy.egress and the grants below say (the default egress is suse.com:443)
+  grants: []
+locked-down:
+  description: No network at all; every probe except the controls shows DENIED
+  egress: ""
+  grants: []
+suse-only:
+  description: curl reaches suse.com only (what can-i starts with)
+  egress: "suse.com:443"
+  grants: []
+web-read:
+  description: curl reaches suse.com, opensuse.org and one.one.one.one
+  egress: "suse.com:443"
+  grants: [opensuse, cloudflare]
+agent-installer:
+  description: web-read plus python reading PyPI, the way an agent installs packages
+  egress: "suse.com:443"
+  grants: [opensuse, cloudflare, pypi]
+everything:
+  description: Every probe the policy can grant is ALLOWED (only the hard limits stay DENIED)
+  egress: "suse.com:443"
+  grants: [opensuse, cloudflare, pypi, nmap, agentTools, varTmp]
