@@ -72,8 +72,8 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- $_ := set $rules $rk (deepCopy $rule) -}}
 {{- end -}}
 {{- end -}}
-{{- if $g.pythonFromUrl -}}
-{{- $url := urlParse (required "policy.grants.susePypi needs checks.susePypiUrl" $.Values.checks.susePypiUrl) -}}
+{{- if and $g.pythonFromUrl $.Values.checks.susePypiUrl -}}
+{{- $url := urlParse $.Values.checks.susePypiUrl -}}
 {{- $port := 443 -}}
 {{- $hp := splitList ":" $url.host -}}
 {{- if gt (len $hp) 1 }}{{ $port = atoi (last $hp) }}{{ end -}}

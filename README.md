@@ -354,7 +354,7 @@ profile. Each grant flips the probe named in its description from DENIED to ALLO
 | `opensuse` | curl to opensuse.org:443 | |
 | `cloudflare` | curl to one.one.one.one:443 | HTTPS to one.one.one.one |
 | `pypi` | python to pypi.org | Upstream PyPI |
-| `susePypi` | python to the host of `checks.susePypiUrl` | SUSE PyPI |
+| `susePypi` | python to the host of `checks.susePypiUrl` (skipped while blank) | SUSE PyPI |
 | `nmap` | nmap to suse.com:443 | Port scan suse.com:443 |
 | `agentTools` | read-only `/srv/can-i-tools` | Run a tool from /srv/can-i-tools |
 | `varTmp` | read-write `/var/tmp` | Write to /var/tmp |

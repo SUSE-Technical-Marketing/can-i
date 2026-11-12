@@ -1,6 +1,11 @@
 can-i is starting as OpenShell sandbox "{{ .Values.sandbox.name }}" from
   {{ include "can-i.sandboxImage" . }}
 
+{{- if and .Values.policy.grants.susePypi (not .Values.checks.susePypiUrl) }}
+Note: policy.grants.susePypi is on, but checks.susePypiUrl is blank, so no rule was added for
+the SUSE PyPI index. Set the URL (Starting policy > SUSE PyPI index URL) and upgrade.
+{{- end }}
+
 Watch the client create it:
   kubectl -n {{ .Release.Namespace }} logs -f deploy/{{ include "can-i.clientName" . }}
 

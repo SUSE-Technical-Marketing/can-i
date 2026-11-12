@@ -24,7 +24,7 @@ pypi:
         - {path: "/usr/bin/python3*"}
         - {path: "/opt/**/bin/python3*"}
 susePypi:
-  description: python may read SUSE's package index (host of checks.susePypiUrl; set that URL too)
+  description: python may read SUSE's package index (host of checks.susePypiUrl; skipped while that URL is blank)
   pythonFromUrl: true
 nmap:
   description: nmap may reach suse.com:443 (flips "Port scan suse.com:443")
