@@ -6,7 +6,35 @@ entries:
       catalog.cattle.io/release-name: can-i
     apiVersion: v2
     appVersion: 0.1.0
-    created: "2026-11-05T20:18:14.175118-08:00"
+    created: "2026-11-12T11:26:32.470615-07:00"
+    description: can-i security capability inspector, run as an OpenShell sandbox
+      workload. Pick the sandbox image (SUSE BCI, openSUSE Leap 16 or NVIDIA Ubuntu)
+      and watch what the OpenShell policy lets an agent do.
+    digest: 967b1baffd8d05322b6cc2e2788d09c3375ffe3b44657334e2b084cd8532ee6d
+    home: https://github.com/SUSE-Technical-Marketing/can-i
+    keywords:
+    - openshell
+    - sandbox
+    - security
+    - ai-agents
+    - demo
+    - suse-ai-factory
+    maintainers:
+    - name: SUSE Technical Marketing
+      url: https://github.com/SUSE-Technical-Marketing
+    name: can-i
+    sources:
+    - https://github.com/SUSE-Technical-Marketing/can-i
+    type: application
+    urls:
+    - can-i-0.2.0.tgz
+    version: 0.2.0
+  - annotations:
+      catalog.cattle.io/display-name: OpenShell 3 - can-i sandbox
+      catalog.cattle.io/release-name: can-i
+    apiVersion: v2
+    appVersion: 0.1.0
+    created: "2026-11-12T11:26:32.469821-07:00"
     description: can-i security capability inspector, run as an OpenShell sandbox
       workload. Pick the sandbox image (SUSE BCI, openSUSE Leap 16 or NVIDIA Ubuntu)
       and watch what the OpenShell policy lets an agent do.
@@ -29,4 +57,4 @@ entries:
     urls:
     - can-i-0.1.5.tgz
     version: 0.1.5
-generated: "2026-11-05T20:18:14.174441-08:00"
+generated: "2026-11-12T11:26:32.469081-07:00"
