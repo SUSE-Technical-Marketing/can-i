@@ -123,6 +123,19 @@ def test_extra_yaml_rules_are_added_last(tmp_path):
     policy_to_checks(yaml.safe_dump(policy))  # can-i's own policy reader accepts it
 
 
+def test_suse_pypi_grant_without_a_url_is_skipped_not_fatal(tmp_path):
+    policy = policy_of(tmp_path, profile="locked-down", grants={"susePypi": True, "pypi": True})
+    assert hosts(policy, "can-i-python3") == ["pypi.org", "files.pythonhosted.org"]
+    policy = policy_of(tmp_path, profile="locked-down", grants={"susePypi": True})
+    assert "network_policies" not in policy
+
+
+def test_every_grant_ticked_renders(tmp_path):
+    grants = yaml.safe_load((CHART / "policy-grants.yaml").read_text())
+    docs = render(tmp_path, policy={"profile": "custom", "grants": {k: True for k in grants}})
+    policy_to_checks(kind(docs, "ConfigMap")["data"]["policy.yaml"])
+
+
 @pytest.mark.parametrize("bad", [{"profile": "nope"}, {"grants": {"bogus": True}}, {"extraYaml": "a: ["}])
 def test_bad_policy_input_fails_the_render(tmp_path, bad):
     with pytest.raises(subprocess.CalledProcessError):

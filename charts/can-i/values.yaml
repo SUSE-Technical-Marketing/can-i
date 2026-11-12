@@ -46,7 +46,7 @@ policy:
     opensuse: false     # curl -> opensuse.org:443
     cloudflare: false   # curl -> one.one.one.one:443
     pypi: false         # python -> pypi.org
-    susePypi: false     # python -> the host of checks.susePypiUrl (set that too)
+    susePypi: false     # python -> the host of checks.susePypiUrl (skipped while that is blank)
     nmap: false         # nmap -> suse.com:443
     agentTools: false   # /srv/can-i-tools readable and runnable (needs a recreate)
     varTmp: false       # /var/tmp writable (needs a recreate)
